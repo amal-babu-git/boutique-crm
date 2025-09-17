@@ -11,7 +11,6 @@
 8. [Employee Management Module](#employee-management-module)
 9. [Simple Accounting Module](#simple-accounting-module)
 10. [User Roles & Permissions](#user-roles--permissions)
-11. [Technical Requirements](#technical-requirements)
 
 ## System Overview
 
@@ -31,17 +30,12 @@ The Boutique CRM is a comprehensive customer relationship and order management s
 ## Appointment Management Module
 
 ### Purpose
-Manages appointments captured from the boutique's website landing page and manual entries. This module serves as the initial touchpoint for customer engagement and handles scheduling for consultations, measurements, trials, and deliveries.
+Basic appointment management system for viewing and managing appointment details collected from the client web landing page. This module provides essential CRUD (Create, Read, Update, Delete) operations for appointment data with no additional features.
 
 ### Core Features
-- **Website Form Integration**: Seamless capture of appointment requests from the boutique's landing page
-- **Appointment Scheduling Calendar**: Interactive calendar for scheduling and managing appointments
-- **Multi-Service Support**: Handle different types of appointments (consultation, measurement, trial, delivery)
-- **Customer Notification System**: Automated SMS/email reminders and confirmations
-- **Status Tracking**: Real-time status updates (Scheduled, Confirmed, Completed, Cancelled)
-- **Employee Assignment**: Assign appointments to specific staff members
-- **Conflict Management**: Prevent double-booking and scheduling conflicts
-- **Walk-in Management**: Handle walk-in customers and emergency appointments
+- **Appointment CRUD Operations**: Complete Create, Read, Update, Delete functionality for appointments
+- **Website Form Integration**: View appointments collected from the client web landing page
+- **Basic Appointment Management**: Simple interface to manage appointment details
 
 ### Data Model
 ```
@@ -52,15 +46,10 @@ Appointment {
   email: String (Optional)
   appointment_date: DateTime (Required)
   appointment_time: Time (Required)
-  service_type: Enum [Consultation, Measurement, Trial, Delivery, Alteration]
-  status: Enum [Scheduled, Confirmed, In_Progress, Completed, Cancelled, No_Show]
-  notes: Text (Optional)
-  source: Enum [Website, Phone, Walk_in, Referral]
-  assigned_employee: Foreign Key -> Employee
-  duration_minutes: Integer (Default: 60)
-  reminder_sent: Boolean (Default: false)
-  cancellation_reason: String (Optional)
-  rescheduled_from: Foreign Key -> Appointment (Optional)
+  service_type: String (Optional)
+  message: Text (Optional)
+  status: Enum [New, Viewed, Contacted, Completed, Cancelled]
+  source: String (Default: "Website Landing Page")
   created_at: DateTime
   updated_at: DateTime
 }
@@ -68,20 +57,19 @@ Appointment {
 
 ### Process Flow
 ```
-Website Form Submission/Manual Entry → Appointment Creation → Employee Assignment → 
-Customer Confirmation → Reminder Notifications → Appointment Execution → 
-Status Update → Follow-up Actions
+Website Landing Page Form Submission → Appointment Creation → 
+Basic CRUD Operations (View/Edit/Delete) → Status Updates
 ```
 
-**Detailed Process Steps:**
-1. **Appointment Request**: Customer submits request via website or phone call
-2. **Availability Check**: System checks employee availability and slot conflicts
-3. **Appointment Creation**: New appointment record created with all details
-4. **Employee Assignment**: Based on service type and availability
-5. **Customer Confirmation**: Automated confirmation sent via preferred method
-6. **Reminder System**: 24-hour and 2-hour reminders sent automatically
-7. **Appointment Execution**: Staff updates status during the appointment
-8. **Completion Actions**: Post-appointment follow-up and potential lead conversion
+### Details
+This module provides basic appointment management functionality for appointments submitted through the client web landing page. Staff can:
+
+1. **Create**: Add new appointments manually if needed
+2. **Read**: View all appointment details and information
+3. **Update**: Edit appointment details, update status, and add notes
+4. **Delete**: Remove appointments that are no longer relevant
+
+The module focuses solely on data management without advanced features like scheduling conflicts, notifications, or employee assignments. It serves as a simple database interface for appointment information collected from the website.
 
 ---
 
@@ -93,7 +81,6 @@ Comprehensive lead management system with automatic Meta integration and manual 
 ### Core Features
 - **CRUD Operations**: Complete Create, Read, Update, Delete functionality for leads
 - **Meta Ads Integration**: Automatic lead capture from Facebook/Instagram advertising campaigns
-- **Google Ads Integration**: Capture leads from Google advertising platforms
 - **Manual Lead Entry**: Sales staff can manually add leads from various sources
 - **Lead Scoring System**: Automated scoring based on engagement and profile data
 - **Lead Qualification Workflow**: Structured process to qualify leads effectively
@@ -723,16 +710,12 @@ Performance Analysis
 Comprehensive employee configuration and management system with role-based access control, permission management, and performance tracking. This module manages the complete employee lifecycle and ensures proper access controls across all system modules.
 
 ### Core Features
-- **CRUD Employee Operations**: Complete employee data management
-- **Role-Based Access Control**: Define roles with specific permissions
-- **Permission Management**: Granular control over module and feature access
-- **Task Assignment Tracking**: Monitor tasks assigned to each employee
-- **Performance Monitoring**: Track employee productivity and performance metrics
-- **Attendance Management**: Basic attendance tracking and reporting
-- **Skill Matrix Management**: Track employee skills and specializations
-- **Department Organization**: Organize employees by departments and teams
-- **Employee Onboarding**: Structured onboarding process for new employees
-- **Performance Reviews**: Periodic performance evaluation system
+- **Basic Employee Operations**: Create, read, update employee information
+- **Simple Role Assignment**: Assign basic roles (Admin, Manager, Employee)
+- **Department Organization**: Organize employees by departments
+- **Contact Information Management**: Maintain employee contact details
+- **Basic Task Assignment**: Assign orders and tasks to employees
+- **Simple Performance Tracking**: Basic productivity monitoring
 
 ### Data Models
 
@@ -750,45 +733,14 @@ Employee {
   hire_date: Date (Required)
   probation_end_date: Date (Optional)
   employment_type: Enum [Full_Time, Part_Time, Contract, Intern]
-  department: Enum [Sales, Design, Production, Administration, Management]
+  department: Enum [Sales, Design, Production, Administration]
   designation: String
   role_id: Foreign Key -> Role (Required)
   reporting_manager: Foreign Key -> Employee (Optional)
-  salary: Decimal (Optional, Encrypted)
-  salary_type: Enum [Monthly, Daily, Hourly, Piece_Rate]
-  bank_account: String (Optional, Encrypted)
-  pan_number: String (Optional, Encrypted)
-  aadhar_number: String (Optional, Encrypted)
-  skills: JSON [
-    {
-      skill_name: String,
-      proficiency_level: Enum [Beginner, Intermediate, Advanced, Expert],
-      years_of_experience: Decimal
-    }
-  ]
-  specializations: JSON [String] (e.g., "Wedding Dresses", "Formal Suits")
-  languages_known: JSON [String]
-  shift_timings: JSON {
-    start_time: Time,
-    end_time: Time,
-    break_duration: Integer (minutes)
-  }
-  working_days: JSON [String] (Days of week)
-  max_concurrent_orders: Integer (Default: 5)
-  current_workload: Integer (Calculated)
-  performance_rating: Decimal (1-5, Updated quarterly)
+  skills: JSON [String] (e.g., ["Tailoring", "Design", "Sales"])
+  specializations: JSON [String] (e.g., ["Wedding Dresses", "Formal Suits"])
   is_active: Boolean (Default: true)
-  termination_date: Date (Optional)
-  termination_reason: Text (Optional)
   notes: Text
-  profile_image_url: String (Optional)
-  documents: JSON [
-    {
-      document_type: String,
-      document_url: String,
-      uploaded_date: DateTime
-    }
-  ]
   created_at: DateTime
   updated_at: DateTime
 }
@@ -801,107 +753,7 @@ Role {
   role_name: String (Unique, Required)
   role_description: Text
   is_admin: Boolean (Default: false)
-  permissions: JSON {
-    appointments: {
-      create: Boolean,
-      read: Boolean,
-      update: Boolean,
-      delete: Boolean,
-      assign_to_others: Boolean
-    },
-    leads: {
-      create: Boolean,
-      read: Boolean,
-      update: Boolean,
-      delete: Boolean,
-      view_all: Boolean,
-      assign_to_others: Boolean
-    },
-    customers: {
-      create: Boolean,
-      read: Boolean,
-      update: Boolean,
-      delete: Boolean,
-      view_sensitive_data: Boolean
-    },
-    materials: {
-      create: Boolean,
-      read: Boolean,
-      update: Boolean,
-      delete: Boolean,
-      view_costs: Boolean,
-      create_purchase_orders: Boolean
-    },
-    sales_orders: {
-      create: Boolean,
-      read: Boolean,
-      update: Boolean,
-      delete: Boolean,
-      approve_discounts: Boolean,
-      view_all_orders: Boolean,
-      modify_costs: Boolean
-    },
-    order_pipeline: {
-      view: Boolean,
-      move_orders: Boolean,
-      assign_tasks: Boolean,
-      update_status: Boolean,
-      view_all_stages: Boolean
-    },
-    employees: {
-      create: Boolean,
-      read: Boolean,
-      update: Boolean,
-      delete: Boolean,
-      manage_permissions: Boolean,
-      view_salary_info: Boolean
-    },
-    accounting: {
-      view_reports: Boolean,
-      record_expenses: Boolean,
-      process_payments: Boolean,
-      view_profit_loss: Boolean
-    },
-    analytics: {
-      view_sales_analytics: Boolean,
-      view_employee_performance: Boolean,
-      view_customer_analytics: Boolean,
-      view_financial_reports: Boolean,
-      export_reports: Boolean
-    }
-  }
   is_active: Boolean (Default: true)
-  created_at: DateTime
-  updated_at: DateTime
-}
-```
-
-#### Employee Performance Model
-```
-EmployeePerformance {
-  id: UUID (Primary Key)
-  employee_id: Foreign Key -> Employee (Required)
-  evaluation_period: String (e.g., "Q1 2024", "Annual 2024")
-  evaluation_date: Date
-  evaluator_id: Foreign Key -> Employee (Manager/Admin)
-  orders_completed: Integer
-  orders_assigned: Integer
-  completion_rate: Decimal (Calculated percentage)
-  average_completion_time: Decimal (Days)
-  quality_rating: Decimal (1-5, Average from order feedback)
-  customer_satisfaction: Decimal (1-5, Average from customer ratings)
-  punctuality_score: Decimal (1-5)
-  teamwork_score: Decimal (1-5)
-  skill_improvement: Text
-  achievements: Text
-  areas_for_improvement: Text
-  training_recommendations: Text
-  salary_revision: Decimal (Optional)
-  promotion_recommended: Boolean (Default: false)
-  overall_rating: Decimal (1-5, Calculated)
-  manager_comments: Text
-  employee_self_assessment: Text
-  goals_next_period: Text
   created_at: DateTime
   updated_at: DateTime
 }
@@ -909,22 +761,16 @@ EmployeePerformance {
 
 ### Process Flow
 ```
-Employee Recruitment → Onboarding → Role Assignment → Training → 
-Task Assignment → Performance Monitoring → Evaluation → 
-Development Planning
+Employee Recruitment → Employee Profile Creation → Role Assignment → 
+Task Assignment → Basic Performance Monitoring
 ```
 
-**Detailed Process Steps:**
-1. **Recruitment Process**: Identify skill requirements and hire suitable candidates
-2. **Employee Onboarding**: Create employee profile with all necessary information
-3. **Role Assignment**: Assign appropriate role based on skills and department
-4. **Permission Setup**: Configure system permissions based on role requirements
-5. **Initial Training**: Provide system training and skill development
-6. **Task Assignment**: Begin assigning tasks based on expertise and capacity
-7. **Performance Monitoring**: Continuous tracking of productivity and quality
-8. **Regular Evaluation**: Periodic performance reviews and feedback sessions
-9. **Skill Development**: Identify training needs and provide development opportunities
-10. **Career Progression**: Plan promotions and role changes based on performance
+**Simplified Process Steps:**
+1. **Employee Profile Creation**: Create basic employee profile with contact information
+2. **Role Assignment**: Assign simple role (Admin, Manager, or Employee)
+3. **Department Assignment**: Assign to appropriate department
+4. **Task Assignment**: Begin assigning orders and tasks based on role
+5. **Basic Monitoring**: Simple tracking of assigned orders and completion
 
 ---
 
@@ -1104,126 +950,30 @@ Decision Making
 
 ## User Roles & Permissions
 
+The system implements a simple 3-tier role-based access control to keep complexity minimal while ensuring essential security.
+
 ### Admin Role
-**Purpose**: Complete system administration and oversight
+**Purpose**: Complete system access and user management
 
-**Permissions**:
-- **Full System Access**: All modules and operations without restrictions
-- **User Management**: Create, modify, and deactivate employee accounts
-- **System Configuration**: Modify system settings, workflows, and configurations
-- **Analytics Access**: All reports, analytics, and business intelligence
-- **Financial Data**: Complete accounting access including sensitive financial information
-- **Data Export**: Export all data types for backup and analysis
-- **Audit Trail**: Access to complete system audit logs
-- **Role Management**: Create and modify roles and permissions
+**Access**:
+- Full access to all modules and features
+- Can create, edit, and deactivate employee accounts
+- Can assign roles to employees
+- Access to all reports and analytics
+- Can modify system settings
 
-### Manager Role
-**Purpose**: Operational oversight and team management
+## Appointment Management Module
 
-**Permissions**:
-- **Operational Oversight**: All customer and order operations
-- **Employee Management**: Assign tasks, monitor performance, conduct evaluations
-- **Sales Analytics**: Access to comprehensive sales and performance reports
-- **Customer Management**: Full customer data access and relationship management
-- **Order Pipeline**: Complete pipeline visibility and management
-- **Financial Reports**: View-only access to financial reports and profitability
-- **Inventory Management**: Monitor stock levels and approve purchase orders
-- **Quality Control**: Monitor quality metrics and customer satisfaction
+### Purpose
+The Appointment Management Module is strictly for viewing the details of appointments that are collected from the landing page of the client website. No other features or actions are available in this module.
 
-### Sales Employee Role
-**Purpose**: Customer acquisition and order management
+### Features
+- View all appointments collected from the client web landing page
 
-**Permissions**:
-- **Lead Management**: CRUD operations on assigned leads and prospects
-- **Customer Management**: CRUD operations on customers with data privacy restrictions
-- **Appointment Scheduling**: Manage appointments and customer interactions
-- **Order Creation**: Create and modify sales orders with approval limits
-- **Quote Generation**: Generate quotes within authorized discount limits
-- **Pipeline Visibility**: View orders assigned to them or their team
-- **Performance Metrics**: Access to personal performance dashboards
-- **Customer Communication**: Send notifications and updates to customers
+### Details
+This module displays appointment details submitted by clients through the website's landing page. It does not support creating, editing, or deleting appointments, nor does it provide notifications, reminders, or employee assignments. The module is strictly read-only and intended for informational purposes only.
 
-### Designer Role
-**Purpose**: Creative design and technical specification development
-
-**Permissions**:
-- **Design Pipeline**: Access to sketch design and approval stages
-- **Customer Consultation**: View customer requirements and measurements
-- **Material Selection**: View material inventory and make recommendations
-- **Design Documentation**: Upload designs, specifications, and technical drawings
-- **Order Details**: View assigned order specifications and customer preferences
-- **Design History**: Access to design archives and previous work
-- **Creative Tools**: Access to design tools and resources
-- **Client Interaction**: Participate in design consultations and approvals
-
-### Production Employee (Tailor) Role
-**Purpose**: Garment production and quality execution
-
-**Permissions**:
-- **Production Pipeline**: Access to assigned production stages
-- **Order Specifications**: View detailed order specifications and measurements
-- **Status Updates**: Update production stage status and progress
-- **Material Usage**: Record material consumption and wastage
-- **Quality Reporting**: Report quality issues and production challenges
-- **Time Tracking**: Log time spent on different orders and stages
-- **Work Instructions**: Access to detailed work instructions and guidelines
-- **Equipment Management**: Report equipment issues and maintenance needs
-
-### Accountant Role (If Applicable)
-**Purpose**: Financial management and reporting
-
-**Permissions**:
-- **Financial Records**: Full access to accounting module
-- **Revenue Management**: Record and track all revenue transactions
-- **Expense Management**: Record and categorize business expenses
-- **Payment Processing**: Process customer payments and supplier payments
-- **Financial Reporting**: Generate all financial reports and statements
-- **Tax Management**: Calculate and track tax liabilities
-- **Bank Reconciliation**: Reconcile bank statements with system records
-- **Audit Support**: Provide audit trail and documentation
-
----
-
-
-## Technical Requirements (Summary)
-
-- **Database**: PostgreSQL 13+ (preferred) or MySQL 8+, scalable to 100GB+, daily/weekly backups, 7-year retention for key data.
-- **Integrations**: REST API for website, Meta/Google Ads, WhatsApp, SMS, Email (SMTP), Payment Gateway, Cloud Storage (AWS S3/Google Cloud).
-- **Security**: Multi-factor authentication, RBAC, encryption (data in transit & at rest), GDPR compliance, audit logging, regular security reviews.
-- **Performance**: Fast response (<1s API, <3s page load), supports 100+ users, 100k+ orders, scalable via load balancing and CDN.
-- **Infrastructure**: Linux server, 8+ CPU cores, 16GB+ RAM, SSD storage, Nginx, Node.js/Django backend, monitoring & alerts, redundant backups.
-
-### Technology Stack Options
-
-Two options:
-1. **Next.js + Django + PostgreSQL**: Full control, advanced features, scalable, requires more setup/maintenance.
-2. **Next.js + Appwrite BaaS**: Rapid development, managed backend, less customization, vendor lock-in risk.
-
-Choose based on business complexity, timeline, and technical resources.
-
-#### Option 1: Next.js + Django + PostgreSQL (Traditional Full-Stack)
-
-**Architecture**:
-- **Frontend**: Next.js 14+ with TypeScript
-- **Backend**: Django 4+ with Django REST Framework (DRF)
-- **Database**: PostgreSQL 15+
-- **Deployment**: Self-hosted or cloud servers (AWS, DigitalOcean, etc.)
-
-**Pros**:
-- ✅ **Complete Control**: Full control over backend logic, database schema, and business rules
-- ✅ **Customization**: Unlimited customization capabilities for complex business requirements
-- ✅ **Scalability**: Can handle high-volume operations and complex integrations
-- ✅ **Data Ownership**: Complete control over data storage and privacy
-- ✅ **No Vendor Lock-in**: Can migrate or change hosting providers easily
-- ✅ **Advanced Features**: Support for complex analytics, reporting, and custom workflows
-- ✅ **Integration Flexibility**: Easy integration with any third-party service or API
-- ✅ **Cost Predictable**: Predictable hosting costs that scale with actual usage
-- ✅ **Performance**: Optimized database queries and custom caching strategies
-- ✅ **Security**: Implement custom security measures and compliance requirements
-
-**Cons**:
-- ❌ **Development Time**: Longer initial development time (8-12 weeks)
-- ❌ **Infrastructure Management**: Requires server management and maintenance
+----
 - ❌ **Technical Expertise**: Need experienced Django developers for maintenance
 - ❌ **DevOps Requirements**: Need to set up CI/CD, monitoring, and backup systems
 - ❌ **Initial Setup Complexity**: More complex initial deployment and configuration
