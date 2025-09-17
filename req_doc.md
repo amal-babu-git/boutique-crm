@@ -1184,90 +1184,22 @@ Decision Making
 
 ---
 
-## Technical Requirements
 
-### Database Requirements
-- **Primary Database**: PostgreSQL 13+ (Recommended) or MySQL 8+
-- **Database Size**: Initial 10GB, scalable to 100GB+
-- **Backup Strategy**: 
-  - Daily automated backups with 30-day retention
-  - Weekly full backups with 1-year retention
-  - Real-time replication for critical data
-- **Data Retention**: 
-  - Customer data: 7 years (regulatory compliance)
-  - Financial records: 7 years (tax compliance)
-  - Order history: 5 years
-  - System logs: 1 year
-- **Performance Requirements**:
-  - Query response time: <500ms for standard queries
-  - Report generation: <30 seconds for monthly reports
-  - Concurrent connections: 100+ simultaneous users
+## Technical Requirements (Summary)
 
-### Integration Requirements
-- **Website Integration**: RESTful API for appointment form submissions
-- **Meta Ads Integration**: Facebook Business API for automated lead import
-- **Google Ads Integration**: Google Ads API for lead capture
-- **WhatsApp API**: Business API for customer communication
-- **SMS Gateway**: Integration for appointment reminders and notifications
-- **Email Service**: SMTP integration for automated emails
-- **Payment Gateway**: Integration for online advance payments (Razorpay, Stripe)
-- **Cloud Storage**: For design files, documents, and backups (AWS S3, Google Cloud)
-
-### Security Requirements
-- **Authentication**: 
-  - Multi-factor authentication for admin and manager roles
-  - Session management with timeout controls
-  - Strong password policies
-- **Authorization**: 
-  - Role-based access control (RBAC)
-  - Granular permission system
-  - API access controls
-- **Data Protection**:
-  - Encryption of sensitive data (PII, financial data)
-  - SSL/TLS encryption for data transmission
-  - Regular security audits and vulnerability assessments
-- **Privacy Compliance**:
-  - GDPR compliance for customer data
-  - Data anonymization capabilities
-  - Right to be forgotten implementation
-- **Audit & Monitoring**:
-  - Complete activity logging
-  - Failed login attempt monitoring
-  - Data access logging
-  - Real-time security monitoring
-
-### Performance & Scalability Requirements
-- **Response Time**: 
-  - Page load time: <3 seconds
-  - API response time: <1 second
-  - Report generation: <30 seconds
-- **Concurrent Users**: Support 50-100 simultaneous users
-- **Data Volume Capacity**:
-  - 50,000+ customer records
-  - 100,000+ order records
-  - 10,000+ material records
-  - 1,000+ employee records
-- **Scalability Architecture**:
-  - Horizontal scaling capability
-  - Load balancing for high availability
-  - Database sharding for large datasets
-  - CDN integration for static content
-
-### Infrastructure Requirements
-- **Server Specifications**:
-  - CPU: 8+ cores (recommended 16 cores for production)
-  - RAM: 16GB minimum (32GB recommended)
-  - Storage: SSD with 500GB+ capacity
-  - Network: 100Mbps+ bandwidth
-- **Operating System**: Linux (Ubuntu 20.04+ or CentOS 8+)
-- **Web Server**: Nginx with SSL/TLS termination
-- **Application Server**: Node.js, Python (Django/Flask), or Java (Spring Boot)
-- **Monitoring**: Application and infrastructure monitoring with alerts
-- **Backup Storage**: Separate backup storage with geographic redundancy
+- **Database**: PostgreSQL 13+ (preferred) or MySQL 8+, scalable to 100GB+, daily/weekly backups, 7-year retention for key data.
+- **Integrations**: REST API for website, Meta/Google Ads, WhatsApp, SMS, Email (SMTP), Payment Gateway, Cloud Storage (AWS S3/Google Cloud).
+- **Security**: Multi-factor authentication, RBAC, encryption (data in transit & at rest), GDPR compliance, audit logging, regular security reviews.
+- **Performance**: Fast response (<1s API, <3s page load), supports 100+ users, 100k+ orders, scalable via load balancing and CDN.
+- **Infrastructure**: Linux server, 8+ CPU cores, 16GB+ RAM, SSD storage, Nginx, Node.js/Django backend, monitoring & alerts, redundant backups.
 
 ### Technology Stack Options
 
-We are providing two technology architecture options for the client to choose from based on their specific needs, budget, and long-term goals:
+Two options:
+1. **Next.js + Django + PostgreSQL**: Full control, advanced features, scalable, requires more setup/maintenance.
+2. **Next.js + Appwrite BaaS**: Rapid development, managed backend, less customization, vendor lock-in risk.
+
+Choose based on business complexity, timeline, and technical resources.
 
 #### Option 1: Next.js + Django + PostgreSQL (Traditional Full-Stack)
 
