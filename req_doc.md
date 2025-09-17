@@ -7,10 +7,12 @@
 4. [Customer Management Module](#customer-management-module)
 5. [Material Management Module](#material-management-module)
 6. [Sales Management Module](#sales-management-module)
-7. [Order Management Module](#order-management-module)
-8. [Employee Management Module](#employee-management-module)
-9. [Simple Accounting Module](#simple-accounting-module)
-10. [User Roles & Permissions](#user-roles--permissions)
+7. [Service Management Module](#service-management-module)
+8. [Order Management Module](#order-management-module)
+9. [Employee Management Module](#employee-management-module)
+10. [Simple Accounting Module](#simple-accounting-module)
+11. [Reports Module](#reports-module)
+12. [User Roles & Permissions](#user-roles--permissions)
 
 ## System Overview
 
@@ -19,10 +21,12 @@ The Boutique CRM is a comprehensive customer relationship and order management s
 ### Key Features
 - **Lead-to-Customer Conversion Pipeline**
 - **Appointment Management from Website Integration**
+- **Service Catalog Management with Pricing**
 - **Custom Order Processing with Visual Pipeline**
 - **Material and Inventory Management**
 - **Employee Task Assignment and Tracking**
-- **Sales Analytics and Reporting**
+- **Invoice Generation and Payment Tracking**
+- **Comprehensive Reporting and Analytics**
 - **Basic Accounting Integration**
 
 ---
@@ -48,7 +52,7 @@ Appointment {
   appointment_time: Time (Required)
   service_type: String (Optional)
   message: Text (Optional)
-  status: Enum [New, Viewed, Contacted, Completed, Cancelled]
+  status: Enum [New, Contacted, confirmed, unqualified, lost]
   source: String (Default: "Website Landing Page")
   created_at: DateTime
   updated_at: DateTime
@@ -222,6 +226,7 @@ PotentialCustomer {
   conversion_probability: Integer (1-100)
   assigned_employee: Foreign Key -> Employee
   status: Enum [New, Contacted, Interested, Not_Interested, Converted]
+  custom_note: String 
   created_at: DateTime
   updated_at: DateTime
 }
@@ -373,6 +378,7 @@ Comprehensive sales order processing system with detailed tracking, analytics, a
 - **Employee Assignment**: Assign orders to specific employees or teams
 - **Sales Analytics Dashboard**: Comprehensive analytics and reporting
 - **Quote Management**: Generate and manage quotations
+- **Invoice Generation**: Automated invoice creation and management
 - **Order Status Tracking**: Real-time order status updates
 - **Revenue Analytics**: Daily, weekly, monthly, and yearly sales analytics
 
@@ -433,6 +439,10 @@ SalesOrder {
   status: Enum [Draft, Confirmed, In_Progress, Trial_Pending, Ready_for_Delivery, Delivered, Cancelled]
   cancellation_reason: Text (Optional)
   customer_satisfaction: Integer (1-5, Post delivery)
+  invoice_number: String (Unique, Auto-generated)
+  invoice_date: DateTime (Auto-set when invoice generated)
+  invoice_status: Enum [Draft, Sent, Paid, Overdue, Cancelled]
+  invoice_due_date: DateTime (Optional)
   notes: Text
   created_at: DateTime
   updated_at: DateTime
@@ -480,8 +490,8 @@ SalesAnalytics {
 ### Process Flow
 ```
 Lead/Customer Consultation → Requirements Analysis → Quote Generation → 
-Quote Approval → Order Creation → Payment Collection → Production Assignment → 
-Order Tracking → Delivery → Final Payment → Analytics Update
+Quote Approval → Order Creation → Invoice Generation → Payment Collection → 
+Production Assignment → Order Tracking → Delivery → Final Payment → Analytics Update
 ```
 
 **Detailed Process Steps:**
@@ -493,16 +503,118 @@ Order Tracking → Delivery → Final Payment → Analytics Update
 6. **Quote Generation**: Professional quote with all details and terms
 7. **Quote Approval**: Customer approval and any negotiations
 8. **Order Confirmation**: Convert quote to confirmed order
-9. **Advance Payment**: Collect advance payment as per policy
-10. **Production Assignment**: Assign to designer and tailor based on skills and workload
-11. **Order Tracking**: Monitor progress through production pipeline
-12. **Trial Scheduling**: Schedule fitting appointment when garment is ready
-13. **Final Adjustments**: Make any necessary alterations after trial
-14. **Quality Check**: Final quality inspection before delivery
-15. **Delivery**: Hand over completed order to customer
-16. **Final Payment**: Collect balance payment
-17. **Feedback Collection**: Customer satisfaction survey
-18. **Analytics Update**: Update sales metrics and performance indicators
+9. **Invoice Generation**: Create professional invoice with all details and payment terms
+10. **Advance Payment**: Collect advance payment as per policy
+11. **Production Assignment**: Assign to designer and tailor based on skills and workload
+12. **Order Tracking**: Monitor progress through production pipeline
+13. **Trial Scheduling**: Schedule fitting appointment when garment is ready
+14. **Final Adjustments**: Make any necessary alterations after trial
+15. **Quality Check**: Final quality inspection before delivery
+16. **Delivery**: Hand over completed order to customer
+17. **Final Payment**: Collect balance payment and update invoice status
+18. **Feedback Collection**: Customer satisfaction survey
+19. **Analytics Update**: Update sales metrics and performance indicators
+
+---
+
+## Service Management Module
+
+### Purpose
+Comprehensive service catalog management system for defining, pricing, and managing all boutique services. This module maintains a centralized repository of services offered, enabling consistent pricing, service descriptions, and performance tracking across the business.
+
+### Core Features
+- **Service CRUD Operations**: Complete Create, Read, Update, Delete functionality for services
+- **Service Categorization**: Organize services by type, complexity, and department
+- **Pricing Management**: Flexible pricing structures with cost and profit margin tracking
+- **Service Templates**: Pre-defined service templates for common offerings
+- **Duration Estimation**: Standard time estimates for service completion
+- **Skill Requirements**: Define required skills and expertise for each service
+- **Service Analytics**: Track service popularity, profitability, and performance
+- **Seasonal Pricing**: Support for seasonal and promotional pricing
+- **Service Bundling**: Create service packages and combination offerings
+- **Quality Standards**: Define quality benchmarks and completion criteria
+
+### Data Models
+
+#### Service Model
+```
+Service {
+  id: UUID (Primary Key)
+  service_code: String (Unique, Auto-generated)
+  name: String (Required)
+  description: Text
+  category: Enum [Stitching, Alteration, Design, Consultation, Repair, Embellishment]
+  subcategory: String (e.g., "Wedding Dress", "Formal Suit", "Casual Wear")
+  service_type: Enum [New_Creation, Alteration, Repair, Consultation, Design_Only]
+  complexity_level: Enum [Simple, Medium, Complex, Highly_Complex]
+  base_price: Decimal
+  cost_price: Decimal (Internal cost calculation)
+  profit_margin: Decimal (Calculated as percentage)
+  pricing_type: Enum [Fixed, Per_Hour, Per_Piece, Custom_Quote]
+  estimated_hours: Decimal
+  min_duration_days: Integer
+  max_duration_days: Integer
+  required_skills: JSON [String] (e.g., ["Tailoring", "Embroidery", "Design"])
+  required_materials: JSON [String] (Common materials used)
+  department: Enum [Design, Production, Alteration, Consultation]
+  is_active: Boolean (Default: true)
+  is_seasonal: Boolean (Default: false)
+  seasonal_markup: Decimal (Optional)
+  quality_standards: Text
+  completion_criteria: Text
+  customer_instructions: Text
+  internal_notes: Text
+  popularity_score: Integer (1-10, Auto-calculated)
+  average_rating: Decimal (Customer satisfaction rating)
+  total_orders: Integer (Auto-calculated)
+  revenue_generated: Decimal (Auto-calculated)
+  created_at: DateTime
+  updated_at: DateTime
+}
+```
+
+#### Service Bundle Model
+```
+ServiceBundle {
+  id: UUID (Primary Key)
+  bundle_name: String (Required)
+  description: Text
+  bundle_services: JSON [
+    {
+      service_id: UUID,
+      quantity: Integer,
+      discount_percentage: Decimal
+    }
+  ]
+  bundle_price: Decimal
+  individual_total: Decimal (Sum of individual service prices)
+  bundle_discount: Decimal (Calculated)
+  estimated_total_hours: Decimal (Sum of service hours)
+  estimated_completion_days: Integer
+  is_active: Boolean (Default: true)
+  valid_from: Date
+  valid_until: Date (Optional)
+  created_at: DateTime
+  updated_at: DateTime
+}
+```
+
+### Process Flow
+```
+Service Definition → Pricing Setup → Skill Requirement Mapping → 
+Quality Standards Definition → Service Activation → Performance Monitoring → 
+Pricing Optimization
+```
+
+**Detailed Process Steps:**
+1. **Service Creation**: Define new service with complete specifications
+2. **Pricing Strategy**: Set competitive pricing based on cost analysis and market research
+3. **Skill Mapping**: Identify required skills and assign to qualified employees
+4. **Quality Definition**: Establish quality standards and completion criteria
+5. **Template Creation**: Create reusable templates for common service configurations
+6. **Bundle Creation**: Combine services into attractive package offerings
+7. **Performance Tracking**: Monitor service popularity, profitability, and customer satisfaction
+8. **Continuous Improvement**: Regular review and optimization of service offerings
 
 ---
 
@@ -771,6 +883,283 @@ Task Assignment → Basic Performance Monitoring
 3. **Department Assignment**: Assign to appropriate department
 4. **Task Assignment**: Begin assigning orders and tasks based on role
 5. **Basic Monitoring**: Simple tracking of assigned orders and completion
+
+---
+
+## Reports Module
+
+### Purpose
+Comprehensive reporting and analytics system providing business intelligence across all modules. This module generates detailed reports for performance analysis, business insights, and strategic decision-making with customizable parameters and automated scheduling.
+
+### Core Features
+- **Lead vs Conversion Reports**: Track lead conversion rates and sales funnel performance
+- **Financial Reports**: Total sales, expenses, and profitability analysis
+- **Staff Performance Reports**: Employee productivity, attendance, and quality metrics
+- **Customer Analytics**: Customer behavior, billing patterns, and loyalty analysis
+- **Purchase History Reports**: Supplier and material purchasing analysis
+- **Custom Report Builder**: Create custom reports with flexible parameters
+- **Automated Report Scheduling**: Schedule reports for automatic generation and delivery
+- **Data Export**: Export reports in multiple formats (PDF, Excel, CSV)
+- **Dashboard Views**: Interactive dashboards for real-time business monitoring
+- **Comparative Analysis**: Period-over-period and year-over-year comparisons
+
+### Data Models
+
+#### Report Configuration Model
+```
+ReportConfiguration {
+  id: UUID (Primary Key)
+  report_name: String (Required)
+  report_type: Enum [
+    Lead_Conversion, 
+    Sales_Analysis, 
+    Expense_Analysis, 
+    Staff_Performance, 
+    Customer_Analysis, 
+    Purchase_History,
+    Financial_Summary,
+    Custom
+  ]
+  parameters: JSON {
+    date_range: {start_date: Date, end_date: Date},
+    filters: JSON,
+    grouping: String,
+    sorting: String,
+    columns: [String]
+  }
+  is_scheduled: Boolean (Default: false)
+  schedule_frequency: Enum [Daily, Weekly, Monthly, Quarterly, Yearly] (Optional)
+  recipients: JSON [String] (Email addresses)
+  format: Enum [PDF, Excel, CSV, Dashboard]
+  created_by: Foreign Key -> Employee
+  is_active: Boolean (Default: true)
+  created_at: DateTime
+  updated_at: DateTime
+}
+```
+
+#### Report Data Models
+
+##### Lead Conversion Report
+```
+LeadConversionReport {
+  id: UUID (Primary Key)
+  report_date: Date
+  period_start: Date
+  period_end: Date
+  total_leads: Integer
+  leads_contacted: Integer
+  leads_qualified: Integer
+  leads_converted: Integer
+  conversion_rate: Decimal (Percentage)
+  qualification_rate: Decimal (Percentage)
+  contact_rate: Decimal (Percentage)
+  average_conversion_time: Decimal (Days)
+  lead_source_breakdown: JSON {
+    Meta: {leads: Integer, conversions: Integer, rate: Decimal},
+    Google: {leads: Integer, conversions: Integer, rate: Decimal},
+    Website: {leads: Integer, conversions: Integer, rate: Decimal},
+    Referral: {leads: Integer, conversions: Integer, rate: Decimal}
+  }
+  employee_performance: JSON [
+    {
+      employee_id: UUID,
+      leads_assigned: Integer,
+      leads_converted: Integer,
+      conversion_rate: Decimal
+    }
+  ]
+  revenue_from_conversions: Decimal
+  cost_per_conversion: Decimal
+  roi_analysis: JSON
+  created_at: DateTime
+}
+```
+
+##### Staff Performance Report
+```
+StaffPerformanceReport {
+  id: UUID (Primary Key)
+  report_date: Date
+  period_start: Date
+  period_end: Date
+  employee_id: Foreign Key -> Employee
+  attendance_data: JSON {
+    total_working_days: Integer,
+    days_present: Integer,
+    days_absent: Integer,
+    attendance_percentage: Decimal,
+    late_arrivals: Integer,
+    early_departures: Integer
+  }
+  work_execution: JSON {
+    orders_assigned: Integer,
+    orders_completed: Integer,
+    orders_in_progress: Integer,
+    completion_rate: Decimal,
+    average_completion_time: Decimal,
+    on_time_delivery: Integer,
+    delayed_deliveries: Integer
+  }
+  quality_metrics: JSON {
+    total_work_done: Integer,
+    rework_count: Integer,
+    rework_percentage: Decimal,
+    customer_satisfaction_avg: Decimal,
+    quality_rating_avg: Decimal,
+    complaints_received: Integer
+  }
+  productivity_score: Decimal (Calculated)
+  revenue_generated: Decimal
+  target_achievement: Decimal (Percentage)
+  skill_utilization: JSON [String]
+  improvement_areas: JSON [String]
+  created_at: DateTime
+}
+```
+
+##### Customer Analytics Report
+```
+CustomerAnalyticsReport {
+  id: UUID (Primary Key)
+  report_date: Date
+  period_start: Date
+  period_end: Date
+  customer_segmentation: JSON {
+    high_value_customers: {
+      count: Integer,
+      criteria: String,
+      total_revenue: Decimal,
+      avg_order_value: Decimal
+    },
+    repeat_customers: {
+      count: Integer,
+      reorder_rate: Decimal,
+      avg_reorder_count: Integer,
+      retention_rate: Decimal
+    },
+    new_customers: {
+      count: Integer,
+      acquisition_cost: Decimal,
+      first_order_avg: Decimal
+    }
+  }
+  billing_analysis: JSON {
+    highest_billing_customers: [
+      {
+        customer_id: UUID,
+        total_spent: Decimal,
+        order_count: Integer,
+        avg_order_value: Decimal
+      }
+    ],
+    billing_distribution: JSON,
+    payment_behavior: JSON
+  }
+  customer_lifecycle: JSON {
+    acquisition_trends: JSON,
+    churn_rate: Decimal,
+    lifetime_value: Decimal,
+    satisfaction_scores: JSON
+  }
+  geographic_analysis: JSON
+  service_preferences: JSON
+  created_at: DateTime
+}
+```
+
+##### Purchase History Report
+```
+PurchaseHistoryReport {
+  id: UUID (Primary Key)
+  report_date: Date
+  period_start: Date
+  period_end: Date
+  total_purchases: Decimal
+  purchase_count: Integer
+  average_purchase_value: Decimal
+  supplier_analysis: JSON [
+    {
+      supplier_id: UUID,
+      total_purchased: Decimal,
+      order_count: Integer,
+      avg_order_value: Decimal,
+      on_time_delivery_rate: Decimal,
+      quality_rating: Decimal
+    }
+  ]
+  material_analysis: JSON [
+    {
+      material_category: String,
+      total_spent: Decimal,
+      quantity_purchased: Decimal,
+      price_trends: JSON
+    }
+  ]
+  cost_analysis: JSON {
+    material_cost_percentage: Decimal,
+    inventory_turnover: Decimal,
+    wastage_percentage: Decimal
+  }
+  seasonal_trends: JSON
+  budget_variance: JSON
+  created_at: DateTime
+}
+```
+
+### Report Types and Features
+
+#### 1. Lead vs Conversion Reports
+- **Conversion Funnel Analysis**: Visual representation of lead progression
+- **Source Performance**: ROI analysis by lead source (Meta, Google, Website, etc.)
+- **Employee Performance**: Individual conversion rates and lead handling efficiency
+- **Time-based Analysis**: Conversion trends over time
+- **Cost per Conversion**: Marketing spend efficiency analysis
+
+#### 2. Sales and Financial Reports
+- **Total Sales Analysis**: Revenue breakdown by period, service, customer
+- **Expense Analysis**: Cost categorization and trend analysis
+- **Profit & Loss**: Comprehensive P&L statements
+- **Cash Flow**: Inflow and outflow analysis
+- **Budget vs Actual**: Variance analysis and forecasting
+
+#### 3. Staff Performance Reports
+- **Attendance Tracking**: Punctuality, absence rates, and attendance patterns
+- **Work Execution**: Order completion rates, productivity metrics
+- **Quality Metrics**: Rework count, customer satisfaction, quality ratings
+- **Skill Utilization**: Expertise deployment and development needs
+- **Target Achievement**: Goal setting and performance measurement
+
+#### 4. Customer Reports
+- **High-Value Customer Analysis**: Top customers by revenue and profitability
+- **Reorder Analysis**: Customer loyalty and repeat business patterns
+- **Customer Segmentation**: Behavioral and demographic grouping
+- **Satisfaction Analysis**: Service quality and customer experience metrics
+- **Churn Analysis**: Customer retention and loss patterns
+
+#### 5. Purchase History Reports
+- **Supplier Performance**: Delivery, quality, and pricing analysis
+- **Material Cost Analysis**: Price trends and cost optimization opportunities
+- **Inventory Efficiency**: Stock turnover and wastage analysis
+- **Budget Management**: Spend analysis and variance reporting
+- **Seasonal Planning**: Demand forecasting and inventory planning
+
+### Process Flow
+```
+Report Request → Parameter Configuration → Data Collection → 
+Data Processing → Report Generation → Distribution → Analysis → 
+Action Planning
+```
+
+**Detailed Process Steps:**
+1. **Report Definition**: Define report type, parameters, and frequency
+2. **Data Collection**: Gather data from relevant modules and time periods
+3. **Data Processing**: Apply filters, calculations, and formatting
+4. **Report Generation**: Create visual reports with charts and analysis
+5. **Automated Distribution**: Send reports to designated recipients
+6. **Performance Analysis**: Review insights and identify trends
+7. **Action Planning**: Develop strategies based on report findings
+8. **Continuous Monitoring**: Track progress and adjust strategies
 
 ---
 
